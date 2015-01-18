@@ -1,0 +1,52 @@
+Activity Monitoring - Quantified Self
+===========================================================
+
+Some context
+
+
+This piece of code will read the data from your working directory:
+
+```{r readdata}
+act <- read.csv(unz("./RepData_PeerAssessment1/activity.zip", "activity.csv"))
+act<-transform(act,interval = as.factor(interval))
+act<-transform(act,date = as.factor(date))
+library(ggplot2)
+library(plyr)
+```
+
+Now for the frequency bit:
+
+```{r Meanandhistogram}
+stepsum<-tapply(act$steps,act$date,sum,na.rm=TRUE)
+hist(stepsum)
+hist(stepsum, breaks=30, xlab = "Step Count", main ="Step count by day")
+stepferq<- mean(stepsum)
+stepmedian<-median(stepsum)
+```
+
+
+
+
+```{r avgdailyactivitypattern}
+Temp<-tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
+data<-as.data.frame(cbind(as.numeric(as.character(levels(activity$interval))),Temp))
+ggplot(data, aes(V1, Temp)) + geom_line()+xlab("Interval")+ ylab("Number of steps")
+Maxinterval<-data$V1[data$Temp==max(data$Temp)]
+```
+
+act1<-ddply(act,'interval',transform, stepbyint= mean(steps))
+```{r navalues}
+activity2<-activity
+countna<-sum(as.numeric(is.na(activity2$steps)))
+activity2$steps[is.na(activity2$steps)==TRUE]<-1
+stepsum2<-tapply(activity2$steps,activity2$date,sum)
+stepferq2<- mean(stepsum2)
+stepmedian2<-median(stepsum2)
+```
+
+
+```{r panelgraphs}
+activity2$date<-strptime(activity2$date, format ="%Y-%m-%d", tz="GMT")
+activity2$Weekday<- "Weekday"
+activity2$Weekday[weekdays(activity2$date)=="Sunday"|weekdays(activity2$date)=="Saturday"]<-"Weekend" 
+
